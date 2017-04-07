@@ -2,13 +2,13 @@
 
 # external libraries
 from sanic import Sanic
-from sanic.response import json
+from sanic.response import tex
 
 app = Sanic(__name__)
 
-@app.route("/")
+@app.route("/ping")
 async def start(request):
-    return json("hola": "mundo")
+    return text("pong")
 
 
 if __name__ == "__main__":
