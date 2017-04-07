@@ -2,7 +2,7 @@
 
 # external libraries
 from sanic import Sanic
-from sanic.response import tex
+from sanic.response import text
 
 app = Sanic(__name__)
 
