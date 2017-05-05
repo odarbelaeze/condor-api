@@ -15,9 +15,9 @@ async def start(request):
     return text("pong")
 
 
-@app.route("/list")
+@app.route("/bibliography")
 @requires_db
-async def join_list(db, request):
+async def format_list_bibliography(db, request):
     to_return = [{
         'eid': bib.eid,
         'description': bib.description,
@@ -27,7 +27,7 @@ async def join_list(db, request):
     return json(to_return)
 
 
-def list_db(db, count):
+def list_bibliography_from_db(db, count):
     """
     List all the document sets.
     """
