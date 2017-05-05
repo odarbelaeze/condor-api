@@ -4,7 +4,7 @@
 from sanic import Sanic
 from sanic.response import text, json
 from condor.dbutil import requires_db
-from condor.models import BibliographySet
+from condor.models import Bibliography
 
 
 app = Sanic(__name__)
@@ -23,7 +23,7 @@ async def format_list_bibliography(db, request):
         'description': bib.description,
         'created': bib.created,
         'modified': bib.modified
-    } for bib in list_db(db, count=10)]
+    } for bib in list_bibliography_from_db(db, count=10)]
     return json(to_return)
 
 
@@ -31,8 +31,8 @@ def list_bibliography_from_db(db, count):
     """
     List all the document sets.
     """
-    bibliography_sets = db.query(BibliographySet).order_by(
-        BibliographySet.created.desc()
+    bibliography_sets = db.query(Bibliography).order_by(
+        Bibliography.created.desc()
     ).limit(count)
     return bibliography_sets.all()
 
