@@ -13,23 +13,20 @@ app = Sanic(__name__)
 async def start(request):
     return text("pong")
 
-@app.route("/matrix", methods=["GET", "POST"])
+@app.route("/ranking", methods=["GET"])
 @requires_db
-async def matrix(db, request):
-    if request.method == "GET":
-        ranking_matrices = [
-            {
-                "kind": matrix.kind,
-                "build_options": matrix.build_options,
-                "ranking_matrix_path": matrix.ranking_matrix_path
-            }
-            for matrix in list_ranking_matrix(db, count=10)
-        ]
-        return json(ranking_matrices)
-    elif request.method == "POST":
-        return json({"ping": "pong"})
+async def ranking(db, request):
+    ranking_matrices = [
+        {
+            "kind": matrix.kind,
+            "build_options": matrix.build_options,
+            "ranking_matrix_path": matrix.ranking_matrix_path
+        }
+        for matrix in list_ranking_matrices_from_db(db, count=10)
+    ]
+    return json(ranking_matrices)
 
-def list_ranking_matrix(db, count):
+def list_ranking_matrices_from_db(db, count):
     """
     List all ranking matrices
     """
