@@ -4,7 +4,7 @@
 from sanic import Sanic
 from sanic.response import text, json
 from condor.dbutil import requires_db
-from condor.models import Bibliography, TermDocumentMatrix
+from condor.models import Bibliography, RankingMatrix, TermDocumentMatrix
 
 
 app = Sanic(__name__)
@@ -14,6 +14,27 @@ app = Sanic(__name__)
 async def start(request):
     return text("pong")
 
+@app.route("/ranking", methods=["GET"])
+@requires_db
+async def ranking(db, request):
+    ranking_matrices = [
+        {
+            "kind": matrix.kind,
+            "build_options": matrix.build_options,
+            "ranking_matrix_path": matrix.ranking_matrix_path
+        }
+        for matrix in list_ranking_matrices_from_db(db, count=10)
+    ]
+    return json(ranking_matrices)
+
+def list_ranking_matrices_from_db(db, count):
+    """
+    List all ranking matrices
+    """
+    ranking_matrices = db.query(RankingMatrix).order_by(
+        RankingMatrix.created.desc()
+    ).limit(count)
+    return ranking_matrices
 
 @app.route("/bibliography")
 @requires_db
