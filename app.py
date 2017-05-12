@@ -37,9 +37,9 @@ def list_bibliography_from_db(db, count):
     return bibliography_sets.all()
 
 
-@app.route("/document_matrix")
+@app.route("/matrix")
 @requires_db
-async def format_term_document_matrix(db, request):
+async def list_term_document_matrices(db, request):
     to_return = [{
         "bibliography_eid": document.bibliography_eid,
         "bibliography_options": document.bibliography_options,
