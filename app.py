@@ -50,7 +50,7 @@ async def list_term_document_matrices(db, request):
     return json(to_return)
 
 
-def list_term_document_matrix_from_db(db, count):
+def list_term_document_matrices_from_db(db, count):
     """
     Lis all the term document matrix
     """
