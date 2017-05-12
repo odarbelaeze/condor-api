@@ -1,0 +1,9 @@
+version: '2'
+services:
+  backend:
+    build: .
+    command: python app.py
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
