@@ -4,7 +4,7 @@
 from sanic import Sanic
 from sanic.response import text, json
 from condor.dbutil import requires_db
-from condor.models import Bibliography, RankingMatrix, TermDocumentMatrix
+from condor.models import Bibliography, RankingMatrix, TermDocumentMatrix, Document
 
 
 app = Sanic(__name__)
@@ -45,6 +45,31 @@ async def format_list_bibliography(db, request):
         "created": bib.created,
         "modified": bib.modified
     } for bib in list_bibliography_from_db(db, count=10)]
+    return json(to_return)
+
+
+@app.route('/document')
+@requires_db
+async def list_documents(database, request):
+    """
+    List the documents associated with a bibliography.
+    """
+    bibliography_eid = request.args.get('bibliography', None)
+    if not bibliography_eid:
+        return json({
+            'error': 'You must suply a bibliography eid.',
+            'details': 'Fill in the bibliography field.'
+        }, status=400)
+    to_return = [
+        {
+            'eid': doc.eid,
+            'title': doc.title,
+            'description': doc.description,
+            'created': doc.created,
+            'modified': doc.modified
+        }
+        for doc in Document.list(database, bibliography_eid)
+    ]
     return json(to_return)
 
 

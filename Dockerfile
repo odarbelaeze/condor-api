@@ -8,5 +8,6 @@ ADD ./requirements.txt /
 RUN pip install -r requirements.txt
 RUN python -m nltk.downloader snowball_data
 RUN python -m nltk.downloader stopwords
+RUN condor utils preparedb -y
 
 WORKDIR /app
