@@ -92,7 +92,7 @@ async def list_term_document_matrices(db, request):
         "processing_options": document.processing_options,
         "term_list_path": document.term_list_path,
         "matrix_path": document.matrix_path
-    } for document in list_term_document_matrix_from_db(db, count=10)]
+    } for document in list_term_document_matrices_from_db(db, count=10)]
     return json(to_return)
 
 
