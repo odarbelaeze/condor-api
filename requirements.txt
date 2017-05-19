@@ -1,13 +1,19 @@
 aiofiles==0.3.1
+aiohttp==2.0.7
+async-timeout==1.2.1
 bibtexparser==0.6.2
+chardet==3.0.3
 click==6.7
 condor-ir==1.1.0
 httptools==0.0.9
 marshmallow==2.13.5
+multidict==2.1.5
 nltk==3.2.3
 numpy==1.12.1
+py==1.4.33
 pyenchant==1.6.8
 PyPDF2==1.26.0
+pytest==3.0.7
 requests==2.14.2
 sanic==0.5.4
 six==1.10.0
@@ -17,3 +23,4 @@ tqdm==4.11.2
 ujson==1.35
 uvloop==0.8.0
 websockets==3.3
+yarl==0.10.2
