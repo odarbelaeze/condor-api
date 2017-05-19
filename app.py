@@ -17,10 +17,10 @@ async def start(request):
 
 @app.route("/ranking", methods=["GET"])
 @requires_db
-async def ranking(db, request):
+async def list_rankings(db, request):
     ranking_matrices = [
         {
-            "eid_ranking": matrix.eid,
+            "eid": matrix.eid,
             "kind": matrix.kind,
             "build_options": matrix.build_options,
             "ranking_matrix_path": matrix.ranking_matrix_path
@@ -71,7 +71,7 @@ async def list_documents(database, request):
 @requires_db
 async def list_term_document_matrices(db, request):
     to_return = [{
-        "eid_matrix": document.eid,
+        "eid": document.eid,
         "bibliography_eid": document.bibliography_eid,
         "bibliography_options": document.bibliography_options,
         "processing_options": document.processing_options,
