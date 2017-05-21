@@ -4,11 +4,15 @@
 from sanic import Sanic
 from sanic.response import text, json
 from condor.dbutil import requires_db
-from condor.models import Bibliography, RankingMatrix, \
-    TermDocumentMatrix, Document
+from condor.models import Bibliography, RankingMatrix, TermDocumentMatrix, Document
 
 
 app = Sanic(__name__)
+
+
+@app.route("/ping")
+async def start(request):
+    return text("pong")
 
 
 @app.route("/ranking", methods=["GET"])
@@ -29,45 +33,13 @@ async def list_rankings(db, request):
 @app.route("/bibliography")
 @requires_db
 async def list_bibliographies(db, request):
-    bibliographies = [
-        {
-            "eid": bib.eid,
-            "description": bib.description,
-            "created": bib.created,
-            "modified": bib.modified
-        }
-        for bib in Bibliography.list(db)
-    ]
-    return json(bibliographies)
-
-
-@app.route("/bibliography_eid")
-@requires_db
-async def bibliography(db, request):
-    """
-    Blibliography associated with a blibliography eid
-    """
-    bibliography_eid = request.args.get('eid', None)
-    if not bibliography_eid:
-        return json(
-            {
-                'error': 'You must suply a bibliography eid.',
-                'details': 'Fill in the bibliography field.'
-            },
-            status=400
-        )
-
-    bibliography = [
-        {
-            "eid": bib.eid,
-            "description": bib.description,
-            "created": bib.created,
-            "modified": bib.modified
-        }
-        for bib in Bibliography.list(db)
-        if bib.eid == bibliography_eid
-    ]
-    return json(bibliography)
+    to_return = [{
+        "eid": bib.eid,
+        "description": bib.description,
+        "created": bib.created,
+        "modified": bib.modified
+    } for bib in Bibliography.list(db)]
+    return json(to_return)
 
 
 @app.route('/document')
@@ -78,15 +50,11 @@ async def list_documents(database, request):
     """
     bibliography_eid = request.args.get('bibliography', None)
     if not bibliography_eid:
-        return json(
-            {
-                'error': 'You must suply a bibliography eid.',
-                'details': 'Fill in the bibliography field.'
-            },
-            status=400
-        )
-
-    documents = [
+        return json({
+            'error': 'You must suply a bibliography eid.',
+            'details': 'Fill in the bibliography field.'
+        }, status=400)
+    to_return = [
         {
             'eid': doc.eid,
             'title': doc.title,
@@ -96,24 +64,21 @@ async def list_documents(database, request):
         }
         for doc in Document.list(database, bibliography_eid)
     ]
-    return json(documents)
+    return json(to_return)
 
 
 @app.route("/matrix")
 @requires_db
 async def list_term_document_matrices(db, request):
-    document_matrices = [
-        {
-            "eid": document.eid,
-            "bibliography_eid": document.bibliography_eid,
-            "bibliography_options": document.bibliography_options,
-            "processing_options": document.processing_options,
-            "term_list_path": document.term_list_path,
-            "matrix_path": document.matrix_path
-        }
-        for document in TermDocumentMatrix.list(db)
-    ]
-    return json(document_matrices)
+    to_return = [{
+        "eid": document.eid,
+        "bibliography_eid": document.bibliography_eid,
+        "bibliography_options": document.bibliography_options,
+        "processing_options": document.processing_options,
+        "term_list_path": document.term_list_path,
+        "matrix_path": document.matrix_path
+    } for document in TermDocumentMatrix.list(db)]
+    return json(to_return)
 
 
 if __name__ == "__main__":
