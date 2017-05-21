@@ -41,33 +41,25 @@ async def list_bibliographies(db, request):
     return json(bibliographies)
 
 
-@app.route("/bibliography_eid")
+@app.route("/bibliography/<eid>")
 @requires_db
-async def bibliography(db, request):
+async def bibliography(db, request, eid):
     """
-    Blibliography associated with a blibliography eid
+    Bibliography associated with a blibliography eid
     """
-    bibliography_eid = request.args.get('eid', None)
-    if not bibliography_eid:
-        return json(
-            {
-                'error': 'You must suply a bibliography eid.',
-                'details': 'Fill in the bibliography field.'
-            },
-            status=400
-        )
+    bibliography = Bibliography.find_by_eid(db, eid)
 
-    bibliography = [
+    if not bibliography:
+        return json({})
+
+    return json(
         {
-            "eid": bib.eid,
-            "description": bib.description,
-            "created": bib.created,
-            "modified": bib.modified
+            "eid": bibliography.eid,
+            "description": bibliography.description,
+            "created": bibliography.created,
+            "modified": bibliography.modified
         }
-        for bib in Bibliography.list(db)
-        if bib.eid == bibliography_eid
-    ]
-    return json(bibliography)
+    )
 
 
 @app.route('/document')
