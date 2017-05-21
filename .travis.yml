@@ -15,7 +15,7 @@ before_install:
   - sudo apt-get -qq install -y enchant aspell-es aspell-en aspell-it aspell-fr aspell-de aspell-pt
 
 install:
-  - pip -r requirements.txt
+  - pip install -r requirements.txt
   - condor utils preparedb -y
   - pip install coveralls
 
