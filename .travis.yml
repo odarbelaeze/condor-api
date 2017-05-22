@@ -1,0 +1,29 @@
+language: python
+
+python:
+  - "3.5"
+  - "3.6"
+
+cache:
+  pip: true
+  apt: true
+  directories:
+    - $HOME/.nltk_data
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install -y enchant aspell-es aspell-en aspell-it aspell-fr aspell-de aspell-pt
+
+install:
+  - pip install -r requirements.txt
+  - condor utils preparedb -y
+  - pip install coveralls
+
+before_script:
+  - python -m nltk.downloader snowball_data stopwords
+
+script:
+  - coverage run --source=app -m pytest tests
+
+after_success:
+  - coveralls
