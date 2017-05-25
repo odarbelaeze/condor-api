@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/odarbelaeze/condor-api.png?label=ready&title=Ready)](https://waffle.io/odarbelaeze/condor-api?utm_source=badge)
 # condor-api
 
 [![Build Status](https://travis-ci.org/odarbelaeze/condor-api.svg?branch=master)](https://travis-ci.org/odarbelaeze/condor-api)
