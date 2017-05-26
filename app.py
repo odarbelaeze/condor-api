@@ -30,6 +30,25 @@ async def list_rankings(db, request):
     return json(ranking_matrices)
 
 
+@app.route("/ranking/<eid>", methods=["GET"])
+@requires_db
+async def list_rankings(db, request, eid):
+    ranking_matrices = RankingMatrix.find_by_eid(db, eid)
+    if not ranking_matrices:
+        return json({
+            'error': 'You must suply a ranking eid.',
+            'details': 'Fill in the ranking field.'
+        }, status=404)
+    return json(
+        {
+            "eid": ranking_matrices.eid,
+            "kind": ranking_matrices.kind,
+            "build_options": ranking_matrices.build_options,
+            "ranking_matrix_path": ranking_matrices.ranking_matrix_path
+        }
+    )
+
+
 @app.route("/bibliography")
 @requires_db
 async def list_bibliographies(db, request):
