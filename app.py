@@ -75,7 +75,13 @@ async def document(database, request, eid):
         return json({
             'message': 'The especified eid is not found on database.',
         }, status=404)
-    return json(doc)
+    return json({
+        'eid': doc.eid,
+        'title': doc.title,
+        'description': doc.description,
+        'created': doc.created,
+        'modified': doc.modified
+    })
 
 
 
