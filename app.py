@@ -11,6 +11,11 @@ from condor.models import Bibliography, RankingMatrix, \
 app = Sanic(__name__)
 
 
+@app.route("/ping")
+async def start(request):
+    return text("pong")
+
+
 @app.route("/ranking", methods=["GET"])
 @requires_db
 async def list_rankings(db, request):
@@ -50,21 +55,16 @@ async def bibliography(db, request, eid):
     bibliography = Bibliography.find_by_eid(db, eid)
 
     if not bibliography:
-        return json(
-            {
-                "message": "The especified eid is not found on database"
-            },
-            status=404
-        )
+        return json({
+            "message": "The especified eid is not found on database"
+        }, status=404)
 
-    return json(
-        {
-            "eid": bibliography.eid,
-            "description": bibliography.description,
-            "created": bibliography.created,
-            "modified": bibliography.modified
-        }
-    )
+    return json({
+        "eid": bibliography.eid,
+        "description": bibliography.description,
+        "created": bibliography.created,
+        "modified": bibliography.modified
+    })
 
 
 @app.route('/document')
