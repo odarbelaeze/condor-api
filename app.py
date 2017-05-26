@@ -103,7 +103,7 @@ async def term_document_matrix(db, request, eid):
     document_matrices = TermDocumentMatrix.find_by_eid(db, eid)
     if not document_matrices:
         return json({
-            "message": "The especified eid is not found on database"
+            "message": "The especified eid is not found on database."
         }, status=404)
     return json({
             "eid": document_matrices.eid,
