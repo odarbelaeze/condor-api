@@ -38,7 +38,7 @@ async def list_rankings(db, request, eid):
         return json({
             'error': 'You must suply a ranking eid.',
             'details': 'Fill in the ranking field.'
-        }, status=404)
+        }, status=400)
     return json(
         {
             "eid": ranking_matrices.eid,
