@@ -36,8 +36,8 @@ async def list_rankings(db, request, eid):
     ranking_matrices = RankingMatrix.find_by_eid(db, eid)
     if not ranking_matrices:
         return json({
-            'error': 'You must suply a ranking eid.',
-            'details': 'Fill in the ranking field.'
+            'error': 'You must suply a ranking eid',
+            'details': 'Fill in the ranking field'
         }, status=404)
     return json(
         {
