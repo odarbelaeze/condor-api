@@ -112,6 +112,24 @@ async def list_documents(database, request):
     return json(documents)
 
 
+@app.route('/document/<eid>')
+@requires_db
+async def document(database, request, eid):
+    doc = Document.find_by_eid(database, eid)
+    if not doc:
+        return json({
+            'message': 'The especified eid is not found on database.',
+        }, status=404)
+    return json({
+        'eid': doc.eid,
+        'title': doc.title,
+        'description': doc.description,
+        'created': doc.created,
+        'modified': doc.modified
+    })
+
+
+
 @app.route("/matrix")
 @requires_db
 async def list_term_document_matrices(db, request):
