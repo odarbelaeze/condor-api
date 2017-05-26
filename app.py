@@ -32,7 +32,7 @@ async def list_rankings(db, request):
 
 @app.route("/ranking/<eid>", methods=["GET"])
 @requires_db
-async def list_rankings(db, request, eid):
+async def ranking(db, request, eid):
     ranking_matrices = RankingMatrix.find_by_eid(db, eid)
     if not ranking_matrices:
         return json({
