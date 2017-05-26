@@ -50,7 +50,12 @@ async def bibliography(db, request, eid):
     bibliography = Bibliography.find_by_eid(db, eid)
 
     if not bibliography:
-        return json({})
+        return json(
+            {
+                "message": "The especified eid is not found on database"
+            },
+            status=404
+        )
 
     return json(
         {
