@@ -97,6 +97,24 @@ async def list_term_document_matrices(db, request):
     return json(to_return)
 
 
+@app.route("/matrix/<eid>")
+@requires_db
+async def term_document_matrix(db, request, eid):
+    document_matrices = TermDocumentMatrix.find_by_eid(db, eid)
+    if not document_matrices:
+        return json({
+            "message": "The especified eid is not found on database"
+        }, status=404)
+    return json({
+            "eid": document_matrices.eid,
+            "bibliography_eid": document_matrices.bibliography_eid,
+            "bibliography_options": document_matrices.bibliography_options,
+            "processing_options": document_matrices.processing_options,
+            "term_list_path": document_matrices.term_list_path,
+            "matrix_path": document_matrices.matrix_path
+    })
+
+
 if __name__ == "__main__":
     app.run(
         debug=True,
