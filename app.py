@@ -36,17 +36,14 @@ async def list_rankings(db, request, eid):
     ranking_matrices = RankingMatrix.find_by_eid(db, eid)
     if not ranking_matrices:
         return json({
-            'error': 'You must suply a ranking eid',
-            'details': 'Fill in the ranking field'
+            "message": "The especified eid is not found on database"
         }, status=404)
-    return json(
-        {
+    return json({
             "eid": ranking_matrices.eid,
             "kind": ranking_matrices.kind,
             "build_options": ranking_matrices.build_options,
             "ranking_matrix_path": ranking_matrices.ranking_matrix_path
-        }
-    )
+    })
 
 
 @app.route("/bibliography")
