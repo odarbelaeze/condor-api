@@ -8,7 +8,7 @@ class DecoratedResponse(object):
     def __init__(self, response):
         self._response = response
     def json(self):
-        return json.loads(self._response.body)
+        return json.loads(self._response.body.decode('utf-8'))
     def __getattr__(self, name):
         return getattr(self._response, name)
 
