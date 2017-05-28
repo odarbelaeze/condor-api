@@ -1,12 +1,14 @@
 import json
-import pytest
 import os
+from unittest import mock
+
+import pytest
 
 from condor.config import DEFAULT_DB_PATH
 from condor.models.base import DeclarativeBase
 from sanic.testing import SanicTestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm.session import Session
 
 
 class DecoratedResponse(object):
@@ -44,28 +46,41 @@ def engine():
     _engine = create_engine(default_url)
     DeclarativeBase.metadata.drop_all(_engine)
     DeclarativeBase.metadata.create_all(_engine)
-    return _engine
+    yield _engine
+    _engine.dispose()
 
 
-@pytest.fixture()
-def session(engine):
-    """
-    Creates a session maker instance attached to our default engine.
-    """
-    _session = scoped_session(sessionmaker(bind=engine))
+@pytest.fixture(scope='function')
+def connection(engine):
+    _connection = engine.connect()
+    yield _connection
+    _connection.close()
+
+
+@pytest.fixture(scope='function')
+def transaction(connection):
+    _transaction = connection.begin()
+    yield _transaction
+    _transaction.rollback()
+
+
+@pytest.fixture(scope='function')
+def session(connection, transaction, monkeypatch):
+    _session = Session(connection, autocommit=False)
+    # Make sure we do not commit
+    monkeypatch.setattr(_session, 'commit', _session.flush)
     yield _session
-    _session.rollback()
+    _session.close()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def fresh_database(session, monkeypatch):
     """
     Use a fresh database everytime tests run.
     """
-    def mock_requires_db(func):
+    def requires_db_mock(func):
         def wrapper(*args, **kwargs):
-            db = session()
-            monkeypatch.setattr(db, 'commit', db.flush)
-            return func(db, *args, **kwargs)
+            # assert False, 'Here'
+            return func(session, *args, **kwargs)
         return wrapper
-    monkeypatch.setattr('condor.dbutil.requires_db', mock_requires_db)
+    monkeypatch.setattr('app.requires_db', requires_db_mock)

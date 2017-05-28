@@ -56,3 +56,17 @@ def test_document_endpoint_actually_returns_documents(client, session):
     assert res.status == 200
     # And the response is non empty
     assert len(res.json()) > 0
+
+
+def test_single_bibliography_existing(client, session):
+    # Given an existing bibliography
+    bib = Bibliography(eid='123', description='lorem')
+    session.add(bib)
+    session.commit()
+    # When I ask for it
+    _, res = client.get('/bibliography/123')
+    # Then I get a successful response
+    assert res.status == 200
+    # And the response is non empty
+    assert res.json().get('eid') == '123'
+    assert res.json().get('description') == 'lorem'
