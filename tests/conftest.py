@@ -26,16 +26,6 @@ class WrappedSanicTestClient(SanicTestClient):
         return req, DecoratedResponse(res)
 
 
-
-@pytest.fixture()
-def client():
-    """
-    A simple test client wrapper.
-    """
-    from app import app
-    return WrappedSanicTestClient(app)
-
-
 @pytest.fixture(scope='session')
 def engine():
     """
@@ -50,14 +40,14 @@ def engine():
     _engine.dispose()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def connection(engine):
     _connection = engine.connect()
     yield _connection
     _connection.close()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def transaction(connection):
     _transaction = connection.begin()
     yield _transaction
@@ -66,11 +56,13 @@ def transaction(connection):
 
 @pytest.fixture(scope='function')
 def session(connection, transaction, monkeypatch):
-    _session = Session(connection, autocommit=False)
+    _transaction = connection.begin_nested()
+    _session = Session(connection, autoflush=False, autocommit=False)
     # Make sure we do not commit
     monkeypatch.setattr(_session, 'commit', _session.flush)
     yield _session
     _session.close()
+    _transaction.rollback()
 
 
 @pytest.fixture(scope='function', autouse=True)
@@ -78,9 +70,13 @@ def fresh_database(session, monkeypatch):
     """
     Use a fresh database everytime tests run.
     """
-    def requires_db_mock(func):
-        def wrapper(*args, **kwargs):
-            # assert False, 'Here'
-            return func(session, *args, **kwargs)
-        return wrapper
-    monkeypatch.setattr('app.requires_db', requires_db_mock)
+    monkeypatch.setattr('condor.dbutil.session', lambda: session)
+
+
+@pytest.fixture()
+def client(monkeypatch):
+    """
+    A simple test client wrapper.
+    """
+    import app
+    return WrappedSanicTestClient(app.app)
