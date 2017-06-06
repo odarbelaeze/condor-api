@@ -33,7 +33,7 @@ def engine():
     """
     # Use a sqlite database by default.
     default_url = 'sqlite:///' + os.path.join(DEFAULT_DB_PATH, 'condor.db.test')
-    _engine = create_engine(default_url)
+    _engine = create_engine(default_url, isolation_level='READ_UNCOMMITTED')
     DeclarativeBase.metadata.drop_all(_engine)
     DeclarativeBase.metadata.create_all(_engine)
     yield _engine
