@@ -34,6 +34,30 @@ def test_can_get_ranking_matrices(client):
     assert res.json() == []
 
 
+def test_individual_document_endpoint(client, session):
+    # Given some records matching records in the database
+    bib = Bibliography(eid='123', description='lorem')
+    session.add(bib)
+    session.flush()
+    doc = Document(
+        eid='345',
+        bibliography_eid='123',
+        title='lorem',
+        keywords='{}',
+        description='lorem',
+        language='english',
+        hash='alksdjksjdf'
+    )
+    session.add(doc)
+    session.commit()
+    # When I request the documents with the given bibliography eid
+    _, res = client.get('/document/345')
+    # Then I receive a successful response
+    assert res.status == 200
+    # And the response is non empty
+    assert res.json().get('eid') == '345'
+
+
 def test_document_endpoint_actually_returns_documents(client, session):
     # Given some records matching records in the database
     bib = Bibliography(eid='123', description='lorem')
