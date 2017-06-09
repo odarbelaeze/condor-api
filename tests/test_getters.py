@@ -103,3 +103,12 @@ def test_bibliography_endpoint_eid_not_existing(client):
     assert res.status == 404
     # And the response is empty
     assert 'message' in res.json()
+
+
+def test_document_endpoint_eid_not_existing(client):
+    # Given no documents in the database.
+    _, res = client.get('/document/346')
+    # Then I receive a fail response
+    assert res.status == 404
+    # And the response is empty
+    assert 'message' in res.json()
