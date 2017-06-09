@@ -103,3 +103,21 @@ def test_document_endpoint_eid_not_existing(client):
     assert res.status == 404
     # And the response is empty
     assert 'message' in res.json()
+
+
+def test_bibliography_endpoint_when_many_bibliographies(client, session):
+    # Create a bibliography
+    bib = Bibliography(
+        eid='345',
+        description='lorem'
+    )
+    session.add(bib)
+    session.commit()
+    # When I request the list bibliography
+    _, res = client.get('/bibliography')
+    # Then I get a successful response
+    assert res.status == 200
+    # The response is non empty
+    assert len(res.json()) == 1
+    # And has bibliographies
+    assert any(b.get('eid') == '345' for b in res.json())
