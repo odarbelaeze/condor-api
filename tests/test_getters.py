@@ -73,7 +73,7 @@ def test_single_bibliography_existing(client, session):
 
 
 def test_document_endpoint_eid_not_existing(client):
-    # Given no documents in the database
+    # Given no documents in the database.
     _, res = client.get('/document/346')
     # Then I receive a fail response
     assert res.status == 404
