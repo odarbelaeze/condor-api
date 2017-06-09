@@ -78,4 +78,4 @@ def test_document_endpoint_eid_not_existing(client):
     # Then I receive a fail response
     assert res.status == 404
     # And the response is empty
-    assert 'error' in res.json()
+    assert 'message' in res.json()
