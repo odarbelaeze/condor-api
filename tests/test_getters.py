@@ -94,3 +94,12 @@ def test_single_bibliography_existing(client, session):
     # And the response is non empty
     assert res.json().get('eid') == '123'
     assert res.json().get('description') == 'lorem'
+
+
+def test_document_endpoint_eid_not_existing(client):
+    # Given no documents in the database.
+    _, res = client.get('/document/346')
+    # Then I receive a fail response
+    assert res.status == 404
+    # And the response is empty
+    assert 'message' in res.json()
