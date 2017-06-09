@@ -72,25 +72,10 @@ def test_single_bibliography_existing(client, session):
     assert res.json().get('description') == 'lorem'
 
 
-def test_document_endpoint_eid_not_existing(client, session):
-    # Given some records matching records in the database
-    bib = Bibliography(eid='123', description='lorem')
-    session.add(bib)
-    session.flush()
-    doc = Document(
-        eid='345',
-        bibliography_eid='123',
-        title='lorem',
-        keywords='{}',
-        description='lorem',
-        language='english',
-        hash='alksdjksjdf'
-    )
-    session.add(doc)
-    session.commit()
-    # When I request the documents with the given bibliography eid
+def test_document_endpoint_eid_not_existing(client):
+    # Given no documents in the database
     _, res = client.get('/document/346')
     # Then I receive a fail response
     assert res.status == 404
-    # And the response is not empty
-    assert len(res.json()) > 0
+    # And the response is empty
+    assert 'error' in res.json()
