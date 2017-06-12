@@ -2,7 +2,8 @@
 Tests related to get lists of stuffs.
 """
 
-from condor.models import Document, Bibliography, TermDocumentMatrix
+from condor.models import Document, Bibliography, TermDocumentMatrix, \
+    RankingMatrix
 
 
 def test_can_get_bibliographies(client):
@@ -57,6 +58,25 @@ def test_matrix_endpoint_when_there_are_matrix(client, session):
     # And has matrix
     assert any(m.get('eid') == '345' for m in res.json())
 
+
+def test_list_rankings_when_there_are_rankings(client, session):
+    # Given some records matching records in the database
+    rank = RankingMatrix(
+        eid='123',
+        kind='',
+        build_options='',
+        ranking_matrix_path=''
+    )
+    session.add(rank)
+    session.commit()
+    # When I request the documents with the given bibliography eid
+    _, res = client.get('/ranking')
+    # Then I receive a successful response
+    assert res.status == 200
+    # The response is non empty
+    assert len(res.json()) == 1
+    # And has matrix
+    assert any(m.get('eid') == '123' for m in res.json())
 
 
 def test_individual_document_endpoint(client, session):
