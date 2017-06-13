@@ -175,3 +175,26 @@ def test_bibliography_endpoint_when_many_bibliographies(client, session):
     assert len(res.json()) == 1
     # And has bibliographies
     assert any(b.get('eid') == '345' for b in res.json())
+
+
+def test_individual_matrix_endpoint_existing(client, session):
+    # Given some records matching records in the database
+    bib = Bibliography(eid='123', description='lorem')
+    session.add(bib)
+    session.flush()
+    mat = TermDocumentMatrix(
+        eid='345',
+        bibliography_eid='123',
+        bibliography_options='',
+        processing_options='',
+        term_list_path='',
+        matrix_path='',
+    )
+    session.add(mat)
+    session.commit()
+    # When I request the matrix with the eid
+    _, res = client.get('/matrix/345')
+    # Then I receive a successful response
+    assert res.status == 200
+    # And the response is non empty
+    assert len(res.json()) > 0
