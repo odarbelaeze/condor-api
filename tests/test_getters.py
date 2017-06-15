@@ -73,6 +73,24 @@ def test_matrix_endpoint_when_there_are_matrix(client, session):
     assert any(m.get('eid') == '345' for m in res.json())
 
 
+def test_individual_ranking_when_it_exist(client, session):
+    # Given some records matching records in the database
+    rank = RankingMatrix(
+        eid='123',
+        kind='',
+        build_options='',
+        ranking_matrix_path=''
+    )
+    session.add(rank)
+    session.commit()
+    # When I request the ranking eid
+    _, res = client.get('/ranking/123')
+    # Then I receive a successful response
+    assert res.status == 200
+    # And has ranking
+    assert res.json().get('eid') == '123'
+
+
 def test_list_rankings_when_there_are_rankings(client, session):
     # Given some records matching records in the database
     rank = RankingMatrix(
