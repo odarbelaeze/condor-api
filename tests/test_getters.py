@@ -175,3 +175,12 @@ def test_bibliography_endpoint_when_many_bibliographies(client, session):
     assert len(res.json()) == 1
     # And has bibliographies
     assert any(b.get('eid') == '345' for b in res.json())
+
+
+def test_individual_matrix_endpoint_eid_not_existing(client):
+    # Given no eid matrix in the database
+    _, res = client.get('/matrix/346')
+    # Then I receive a fail response
+    assert res.status == 404
+    # And the response is empty
+    assert 'message' in res.json()
