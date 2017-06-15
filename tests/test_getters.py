@@ -34,6 +34,20 @@ def test_can_get_ranking_matrices(client):
     assert res.status == 200
     assert res.json() == []
 
+
+def test_lindividual_ranking_endpoint_for_wrong_id(client, session):
+    # Given no eid ranking in the database
+    _, res = client.get('/ranking/123')
+    # Then i receive a not found
+    assert res.status == 404
+    # The response contains one value
+    assert len(res.json()) == 1
+    # The value of response equals to
+    assert res.json().get("message") == (
+        "The especified eid is not found on database"
+    )
+
+
 def test_matrix_endpoint_when_there_are_matrix(client, session):
     # Given some records matching records in the database
     bib = Bibliography(eid='123', description='lorem')
@@ -57,6 +71,24 @@ def test_matrix_endpoint_when_there_are_matrix(client, session):
     assert len(res.json()) == 1
     # And has matrix
     assert any(m.get('eid') == '345' for m in res.json())
+
+
+def test_individual_ranking_when_it_exist(client, session):
+    # Given some records matching records in the database
+    rank = RankingMatrix(
+        eid='123',
+        kind='',
+        build_options='',
+        ranking_matrix_path=''
+    )
+    session.add(rank)
+    session.commit()
+    # When I request the ranking eid
+    _, res = client.get('/ranking/123')
+    # Then I receive a successful response
+    assert res.status == 200
+    # And has ranking
+    assert res.json().get('eid') == '123'
 
 
 def test_list_rankings_when_there_are_rankings(client, session):
@@ -198,3 +230,12 @@ def test_individual_matrix_endpoint_existing(client, session):
     assert res.status == 200
     # And the response is non empty
     assert len(res.json()) > 0
+
+
+def test_individual_matrix_endpoint_eid_not_existing(client):
+    # Given no eid matrix in the database
+    _, res = client.get('/matrix/346')
+    # Then I receive a fail response
+    assert res.status == 404
+    # And the response is empty
+    assert 'message' in res.json()

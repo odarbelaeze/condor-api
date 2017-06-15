@@ -22,6 +22,7 @@ async def list_rankings(db, request):
     ranking_matrices = [
         {
             "eid": matrix.eid,
+            "term_document_matrix_eid": matrix.term_document_matrix_eid,
             "kind": matrix.kind,
             "build_options": matrix.build_options,
             "ranking_matrix_path": matrix.ranking_matrix_path
@@ -41,6 +42,8 @@ async def ranking(db, request, eid):
         }, status=404)
     return json({
             "eid": ranking_matrices.eid,
+            "term_document_matrix_eid":
+                    ranking_matrices.term_document_matrix_eid,
             "kind": ranking_matrices.kind,
             "build_options": ranking_matrices.build_options,
             "ranking_matrix_path": ranking_matrices.ranking_matrix_path
