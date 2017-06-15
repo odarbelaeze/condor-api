@@ -34,6 +34,20 @@ def test_can_get_ranking_matrices(client):
     assert res.status == 200
     assert res.json() == []
 
+
+def test_lindividual_ranking_endpoint_for_wrong_id(client, session):
+    # Given no eid ranking in the database
+    _, res = client.get('/ranking/123')
+    # Then i receive a not found
+    assert res.status == 404
+    # The response contains one value
+    assert len(res.json()) == 1
+    # The value of response equals to
+    assert res.json().get("message") == (
+        "The especified eid is not found on database"
+    )
+
+
 def test_matrix_endpoint_when_there_are_matrix(client, session):
     # Given some records matching records in the database
     bib = Bibliography(eid='123', description='lorem')
