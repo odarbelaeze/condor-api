@@ -12,3 +12,9 @@ def test_one_equals_one():
 @pytest.mark.xfail
 def test_one_equals_two():
     assert 1 == 2
+
+
+def test_ping(client):
+    _, res = client.get('/ping')
+    assert res.status == 200
+    assert res.body == b'pong'
