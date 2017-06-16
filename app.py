@@ -169,7 +169,7 @@ async def term_document_matrix(db, request, eid):
 
 
 if __name__ == "__main__":
-    app.run(
+    app.run(                # pragma: no cover
         debug=True,
         host="0.0.0.0",
         port=8000,
