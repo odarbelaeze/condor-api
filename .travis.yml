@@ -16,7 +16,7 @@ before_install:
 install:
   - pip install -r requirements.txt
   - condor utils preparedb -y
-  - pip install coveralls
+  - pip install codecov
 
 before_script:
   - python -m nltk.downloader snowball_data stopwords
@@ -25,4 +25,4 @@ script:
   - coverage run --source=app -m pytest tests
 
 after_success:
-  - coveralls
+  - codecov
