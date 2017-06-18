@@ -20,7 +20,7 @@ def test_can_get_documents(client):
 def test_get_documents_require_bibliography(client):
     res = client.get('/document')
     assert res.status_code == 400
-    assert 'error' in res.json()
+    assert 'message' in res.json()
 
 
 def test_can_get_matrices(client):

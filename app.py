@@ -73,17 +73,16 @@ def get_bibliography(eid) -> Response:
     )
 
 
-def get_all_documents(query_params: http.QueryParams) -> Response:
+def get_all_documents(bibliography: http.QueryParam) -> Response:
     db = condor_db.session()
-    bibliography_eid = query_params["bibliography_eid"]
-    if not bibliography_eid:
+    if not bibliography:
         return Response(
             {'message': 'The especified eid is not found on database'},
-            status=404,
+            status=400,
         )
     documents = [
         object_to_dict(doc, sc.Document.properties.keys())
-        for doc in Document.list(db, bibliography_eid)
+        for doc in Document.list(db, bibliography)
     ]
     db.commit()
     return Response(documents)
@@ -124,6 +123,8 @@ def get_matrix(eid) -> Response:
 
 
 routes = [
+    Route('/ping', 'GET', ping),
+
     Route('/ranking', 'GET', get_all_rankings),
     Route('/ranking/{eid}', 'GET', get_ranking),
 
