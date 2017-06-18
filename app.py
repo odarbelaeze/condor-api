@@ -49,7 +49,6 @@ def get_ranking(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    db.commit()
     return Response(object_to_dict(ranking, sc.Ranking.properties.keys()))
 
 
@@ -59,7 +58,6 @@ def get_all_bibliographies() -> Response:
         object_to_dict(bib, sc.Bibliography.properties.keys())
         for bib in Bibliography.list(db)
     ]
-    db.commit()
     return Response(bibliographies)
 
 
@@ -71,7 +69,6 @@ def get_bibliography(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    db.commit()
     return Response(
         object_to_dict(bibliography, sc.Bibliography.properties.keys())
     )
@@ -88,7 +85,6 @@ def get_all_documents(bibliography: http.QueryParam) -> Response:
         object_to_dict(doc, sc.Document.properties.keys())
         for doc in Document.list(db, bibliography)
     ]
-    db.commit()
     return Response(documents)
 
 
@@ -100,7 +96,6 @@ def get_document(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    db.commit()
     return Response(object_to_dict(document, sc.Document.properties.keys()))
 
 
@@ -110,7 +105,6 @@ def get_all_matrices() -> Response:
         object_to_dict(mat, sc.Matrix.properties.keys())
         for mat in TermDocumentMatrix.list(db)
     ]
-    db.commit()
     return Response(matrices)
 
 
@@ -122,7 +116,6 @@ def get_matrix(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    db.commit()
     return Response(object_to_dict(matrix, sc.Matrix.properties.keys()))
 
 
