@@ -1,7 +1,8 @@
 import json
 
 import condor.dbutil as condor_db
-from apistar import App, Route
+from apistar import App, Route, http
+import schemas as sc
 from condor.models import (
     Bibliography,
     RankingMatrix,
@@ -10,26 +11,22 @@ from condor.models import (
 )
 
 
-def condor_table_to_dict(condor_table):
+def object_to_dict(obj, fields):
     def to_serializable(value):
         try:
             json.dumps(value)
             return value
         except Exception:
             return str(value)
-
-    dict_content = {
-        key: to_serializable(condor_table.__dict__[key])
-        for key in condor_table.__dict__.keys()
-        if key is not '_sa_instance_state'
+    return {
+        field: to_serializable(getattr(obj, field)) for field in fields
     }
-    return dict_content
 
 
 def get_all_rankings():
     db = condor_db.session()
     rankings = [
-        condor_table_to_dict(matrix)
+        object_to_dict(matrix, sc.Ranking.properties.keys())
         for matrix in RankingMatrix.list(db)
     ]
     db.commit()
@@ -44,13 +41,13 @@ def get_ranking(eid):
             'message': 'The especified eid is not found on database'
         }
     db.commit()
-    return condor_table_to_dict(ranking)
+    return object_to_dict(ranking, sc.Ranking.properties.keys())
 
 
 def get_all_bibliographies():
     db = condor_db.session()
     bibliographies = [
-        condor_table_to_dict(bib)
+        object_to_dict(bib, sc.Bibliography.properties.keys())
         for bib in Bibliography.list(db)
     ]
     db.commit()
@@ -65,19 +62,18 @@ def get_bibliography(eid):
             'message': 'The especified eid is not found on database'
         }
     db.commit()
-    return condor_table_to_dict(bibliography)
+    return object_to_dict(bibliography, sc.Bibliography.properties.keys())
 
 
-def get_all_documents():
+def get_all_documents(query_params: http.QueryParams):
     db = condor_db.session()
-    bibliography_eid = request.args.get('bibliography', None)
+    bibliography_eid = query_params["bibliography_eid"]
     if not bibliography_eid:
         return {
             'message': 'The especified eid is not found on database'
         }
-
     documents = [
-        condor_table_to_dict(doc)
+        object_to_dict(doc, sc.Document.properties.keys())
         for doc in Document.list(db, bibliography_eid)
     ]
     db.commit()
@@ -92,13 +88,13 @@ def get_document(eid):
             'message': 'The especified eid is not found on database.',
         }
     db.commit()
-    return condor_table_to_dict(document)
+    return object_to_dict(document, sc.Document.properties.keys())
 
 
 def get_all_matrices():
     db = condor_db.session()
     matrices = [
-        condor_table_to_dict(mat)
+        object_to_dict(mat, sc.Matrix.properties.keys())
         for mat in TermDocumentMatrix.list(db)
     ]
     db.commit()
@@ -113,7 +109,7 @@ def get_matrix(eid):
             'message': 'The especified eid is not found on database'
         }
     db.commit()
-    return condor_table_to_dict(matrix)
+    return object_to_dict(matrix, sc.Matrix.properties.keys())
 
 
 routes = [
