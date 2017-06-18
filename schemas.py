@@ -15,7 +15,7 @@ class Document(schema.Object):
         'eid': schema.String(max_length=40),
         'created': schema.String(max_length=20),  # datetime
         'modified': schema.String(max_length=20),  # datetime
-        'bibliograpy_eid': schema.String(max_length=40),
+        'bibliography_eid': schema.String(max_length=40),
         'title': schema.String(max_length=40),
         'description': schema.String(max_length=512),
         'keywords': schema.String(max_length=512),
