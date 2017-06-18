@@ -1,177 +1,141 @@
-# bultin library
+import json
 
-# external libraries
-from sanic import Sanic
-from sanic.response import text, json
-from condor.dbutil import requires_db
-from condor.models import Bibliography, RankingMatrix, \
-    TermDocumentMatrix, Document
-
-
-app = Sanic(__name__)
-
-
-@app.route("/ping")
-async def start(request):
-    return text("pong")
+from apistar import App, Route, Include, http, Response
+from apistar.docs import docs_routes
+from apistar.statics import static_routes
+import condor.dbutil as condor_db
+import schemas as sc
+from condor.models import (
+    Bibliography,
+    RankingMatrix,
+    TermDocumentMatrix,
+    Document
+)
 
 
-@app.route("/ranking", methods=["GET"])
-@requires_db
-async def list_rankings(db, request):
-    ranking_matrices = [
-        {
-            "eid": matrix.eid,
-            "term_document_matrix_eid": matrix.term_document_matrix_eid,
-            "kind": matrix.kind,
-            "build_options": matrix.build_options,
-            "ranking_matrix_path": matrix.ranking_matrix_path
-        }
-        for matrix in RankingMatrix.list(db)
+def object_to_dict(obj, fields):
+    def to_serializable(value):
+        try:
+            json.dumps(value)
+            return value
+        except Exception:
+            return str(value)
+    return {
+        field: to_serializable(getattr(obj, field)) for field in fields
+    }
+
+
+def ping():
+    return "pong"
+
+
+def get_all_rankings() -> Response:
+    """
+    List all ranking matrices from the database.
+    """
+    session = condor_db.session()
+    rankings = [
+        object_to_dict(matrix, sc.Ranking.properties.keys())
+        for matrix in RankingMatrix.list(session)
     ]
-    return json(ranking_matrices)
+    return Response(rankings)
 
 
-@app.route("/ranking/<eid>", methods=["GET"])
-@requires_db
-async def ranking(db, request, eid):
-    ranking_matrices = RankingMatrix.find_by_eid(db, eid)
-    if not ranking_matrices:
-        return json({
-            "message": "The especified eid is not found on database"
-        }, status=404)
-    return json({
-            "eid": ranking_matrices.eid,
-            "term_document_matrix_eid":
-                    ranking_matrices.term_document_matrix_eid,
-            "kind": ranking_matrices.kind,
-            "build_options": ranking_matrices.build_options,
-            "ranking_matrix_path": ranking_matrices.ranking_matrix_path
-    })
+def get_ranking(eid) -> Response:
+    db = condor_db.session()
+    ranking = RankingMatrix.find_by_eid(db, eid)
+    if not ranking:
+        return Response(
+            {'message': 'The especified eid is not found on database'},
+            status=404,
+        )
+    return Response(object_to_dict(ranking, sc.Ranking.properties.keys()))
 
 
-@app.route("/bibliography")
-@requires_db
-async def list_bibliographies(db, request):
+def get_all_bibliographies() -> Response:
+    db = condor_db.session()
     bibliographies = [
-        {
-            "eid": bib.eid,
-            "description": bib.description,
-            "created": bib.created,
-            "modified": bib.modified
-        }
+        object_to_dict(bib, sc.Bibliography.properties.keys())
         for bib in Bibliography.list(db)
     ]
-    return json(bibliographies)
+    return Response(bibliographies)
 
 
-@app.route("/bibliography/<eid>")
-@requires_db
-async def bibliography(db, request, eid):
-    """
-    Bibliography associated with a blibliography eid
-    """
+def get_bibliography(eid) -> Response:
+    db = condor_db.session()
     bibliography = Bibliography.find_by_eid(db, eid)
-
     if not bibliography:
-        return json({
-            "message": "The especified eid is not found on database"
-        }, status=404)
-
-    return json({
-        "eid": bibliography.eid,
-        "description": bibliography.description,
-        "created": bibliography.created,
-        "modified": bibliography.modified
-    })
-
-
-@app.route('/document')
-@requires_db
-async def list_documents(database, request):
-    """
-    List the documents associated with a bibliography.
-    """
-    bibliography_eid = request.args.get('bibliography', None)
-    if not bibliography_eid:
-        return json(
-            {
-                'error': 'You must suply a bibliography eid.',
-                'details': 'Fill in the bibliography field.'
-            },
-            status=400
+        return Response(
+            {'message': 'The especified eid is not found on database'},
+            status=404,
         )
-
-    documents = [
-        {
-            'eid': doc.eid,
-            'title': doc.title,
-            'description': doc.description,
-            'created': doc.created,
-            'modified': doc.modified
-        }
-        for doc in Document.list(database, bibliography_eid)
-    ]
-    return json(documents)
-
-
-@app.route('/document/<eid>')
-@requires_db
-async def document(database, request, eid):
-    doc = Document.find_by_eid(database, eid)
-    if not doc:
-        return json({
-            'message': 'The especified eid is not found on database.',
-        }, status=404)
-    return json({
-        'eid': doc.eid,
-        'title': doc.title,
-        'description': doc.description,
-        'created': doc.created,
-        'modified': doc.modified
-    })
-
-
-
-@app.route("/matrix")
-@requires_db
-async def list_term_document_matrices(db, request):
-    document_matrices = [
-        {
-            "eid": document.eid,
-            "bibliography_eid": document.bibliography_eid,
-            "bibliography_options": document.bibliography_options,
-            "processing_options": document.processing_options,
-            "term_list_path": document.term_list_path,
-            "matrix_path": document.matrix_path
-        }
-        for document in TermDocumentMatrix.list(db)
-    ]
-    return json(document_matrices)
-
-
-@app.route("/matrix/<eid>")
-@requires_db
-async def term_document_matrix(db, request, eid):
-    document_matrices = TermDocumentMatrix.find_by_eid(db, eid)
-    if not document_matrices:
-        return json({
-            "message": "The especified eid is not found on database"
-        }, status=404)
-    return json({
-            "eid": document_matrices.eid,
-            "bibliography_eid": document_matrices.bibliography_eid,
-            "bibliography_options": document_matrices.bibliography_options,
-            "processing_options": document_matrices.processing_options,
-            "term_list_path": document_matrices.term_list_path,
-            "matrix_path": document_matrices.matrix_path
-    })
-
-
-if __name__ == "__main__":
-    app.run(                # pragma: no cover
-        debug=True,
-        host="0.0.0.0",
-        port=8000,
-        log_config=None,
+    return Response(
+        object_to_dict(bibliography, sc.Bibliography.properties.keys())
     )
+
+
+def get_all_documents(bibliography: http.QueryParam) -> Response:
+    db = condor_db.session()
+    if not bibliography:
+        return Response(
+            {'message': 'The especified eid is not found on database'},
+            status=400,
+        )
+    documents = [
+        object_to_dict(doc, sc.Document.properties.keys())
+        for doc in Document.list(db, bibliography)
+    ]
+    return Response(documents)
+
+
+def get_document(eid) -> Response:
+    db = condor_db.session()
+    document = Document.find_by_eid(db, eid)
+    if not document:
+        return Response(
+            {'message': 'The especified eid is not found on database'},
+            status=404,
+        )
+    return Response(object_to_dict(document, sc.Document.properties.keys()))
+
+
+def get_all_matrices() -> Response:
+    db = condor_db.session()
+    matrices = [
+        object_to_dict(mat, sc.Matrix.properties.keys())
+        for mat in TermDocumentMatrix.list(db)
+    ]
+    return Response(matrices)
+
+
+def get_matrix(eid) -> Response:
+    db = condor_db.session()
+    matrix = TermDocumentMatrix.find_by_eid(db, eid)
+    if not matrix:
+        return Response(
+            {'message': 'The especified eid is not found on database'},
+            status=404,
+        )
+    return Response(object_to_dict(matrix, sc.Matrix.properties.keys()))
+
+
+routes = [
+    Route('/ping', 'GET', ping),
+
+    Route('/ranking', 'GET', get_all_rankings),
+    Route('/ranking/{eid}', 'GET', get_ranking),
+
+    Route('/bibliography', 'GET', get_all_bibliographies),
+    Route('/bibliography/{eid}', 'GET', get_bibliography),
+
+    Route('/document', 'GET', get_all_documents),
+    Route('/document/{eid}', 'GET', get_document),
+
+    Route('/matrix', 'GET', get_all_matrices),
+    Route('/matrix/{eid}', 'GET', get_matrix),
+
+    Include('/docs', docs_routes),
+    Include('/static', static_routes),
+]
+
+app = App(routes=routes)

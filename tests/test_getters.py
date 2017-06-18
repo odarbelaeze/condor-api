@@ -7,39 +7,39 @@ from condor.models import Document, Bibliography, TermDocumentMatrix, \
 
 
 def test_can_get_bibliographies(client):
-    _, res = client.get('/bibliography')
-    assert res.status == 200
+    res = client.get('/bibliography')
+    assert res.status_code == 200
 
 
 def test_can_get_documents(client):
-    _, res = client.get('/document?bibliography=123')
-    assert res.status == 200
+    res = client.get('/document?bibliography=123')
+    assert res.status_code == 200
     assert res.json() == []
 
 
 def test_get_documents_require_bibliography(client):
-    _, res = client.get('/document')
-    assert res.status == 400
-    assert 'error' in res.json()
+    res = client.get('/document')
+    assert res.status_code == 400
+    assert 'message' in res.json()
 
 
 def test_can_get_matrices(client):
-    _, res = client.get('/matrix')
-    assert res.status == 200
+    res = client.get('/matrix')
+    assert res.status_code == 200
     assert res.json() == []
 
 
 def test_can_get_ranking_matrices(client):
-    _, res = client.get('/ranking')
-    assert res.status == 200
+    res = client.get('/ranking')
+    assert res.status_code == 200
     assert res.json() == []
 
 
 def test_lindividual_ranking_endpoint_for_wrong_id(client, session):
     # Given no eid ranking in the database
-    _, res = client.get('/ranking/123')
+    res = client.get('/ranking/123')
     # Then i receive a not found
-    assert res.status == 404
+    assert res.status_code == 404
     # The response contains one value
     assert len(res.json()) == 1
     # The value of response equals to
@@ -64,9 +64,9 @@ def test_matrix_endpoint_when_there_are_matrix(client, session):
     session.add(mat)
     session.commit()
     # When I request the documents with the given bibliography eid
-    _, res = client.get('/matrix')
+    res = client.get('/matrix')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # The response is non empty
     assert len(res.json()) == 1
     # And has matrix
@@ -84,9 +84,9 @@ def test_individual_ranking_when_it_exist(client, session):
     session.add(rank)
     session.commit()
     # When I request the ranking eid
-    _, res = client.get('/ranking/123')
+    res = client.get('/ranking/123')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # And has ranking
     assert res.json().get('eid') == '123'
 
@@ -102,9 +102,9 @@ def test_list_rankings_when_there_are_rankings(client, session):
     session.add(rank)
     session.commit()
     # When I request the documents with the given bibliography eid
-    _, res = client.get('/ranking')
+    res = client.get('/ranking')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # The response is non empty
     assert len(res.json()) == 1
     # And has matrix
@@ -128,9 +128,9 @@ def test_individual_document_endpoint(client, session):
     session.add(doc)
     session.commit()
     # When I request the documents with the given bibliography eid
-    _, res = client.get('/document/345')
+    res = client.get('/document/345')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # And the response is non empty
     assert res.json().get('eid') == '345'
 
@@ -152,9 +152,9 @@ def test_document_endpoint_actually_returns_documents(client, session):
     session.add(doc)
     session.commit()
     # When I request the documents with the given bibliography eid
-    _, res = client.get('/document?bibliography=123')
+    res = client.get('/document?bibliography=123')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # And the response is non empty
     assert len(res.json()) > 0
 
@@ -165,9 +165,9 @@ def test_single_bibliography_existing(client, session):
     session.add(bib)
     session.commit()
     # When I ask for it
-    _, res = client.get('/bibliography/123')
+    res = client.get('/bibliography/123')
     # Then I get a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # And the response is non empty
     assert res.json().get('eid') == '123'
     assert res.json().get('description') == 'lorem'
@@ -175,18 +175,18 @@ def test_single_bibliography_existing(client, session):
 
 def test_bibliography_endpoint_eid_not_existing(client):
     # Given no bibliography in the database.
-    _, res = client.get('/bibliography/346')
+    res = client.get('/bibliography/346')
     # Then I receive a fail response
-    assert res.status == 404
+    assert res.status_code == 404
     # And the response is empty
     assert 'message' in res.json()
 
 
 def test_document_endpoint_eid_not_existing(client):
     # Given no documents in the database.
-    _, res = client.get('/document/346')
+    res = client.get('/document/346')
     # Then I receive a fail response
-    assert res.status == 404
+    assert res.status_code == 404
     # And the response is empty
     assert 'message' in res.json()
 
@@ -200,9 +200,9 @@ def test_bibliography_endpoint_when_many_bibliographies(client, session):
     session.add(bib)
     session.commit()
     # When I request the list bibliography
-    _, res = client.get('/bibliography')
+    res = client.get('/bibliography')
     # Then I get a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # The response is non empty
     assert len(res.json()) == 1
     # And has bibliographies
@@ -225,17 +225,17 @@ def test_individual_matrix_endpoint_existing(client, session):
     session.add(mat)
     session.commit()
     # When I request the matrix with the eid
-    _, res = client.get('/matrix/345')
+    res = client.get('/matrix/345')
     # Then I receive a successful response
-    assert res.status == 200
+    assert res.status_code == 200
     # And the response is non empty
     assert len(res.json()) > 0
 
 
 def test_individual_matrix_endpoint_eid_not_existing(client):
     # Given no eid matrix in the database
-    _, res = client.get('/matrix/346')
+    res = client.get('/matrix/346')
     # Then I receive a fail response
-    assert res.status == 404
+    assert res.status_code == 404
     # And the response is empty
     assert 'message' in res.json()
