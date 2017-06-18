@@ -1,6 +1,8 @@
 import json
 
-from apistar import App, Route, http, Response
+from apistar import App, Route, Include, http, Response
+from apistar.docs import docs_routes
+from apistar.statics import static_routes
 import condor.dbutil as condor_db
 import schemas as sc
 from condor.models import (
@@ -28,12 +30,14 @@ def ping():
 
 
 def get_all_rankings() -> Response:
-    db = condor_db.session()
+    """
+    List all ranking matrices from the database.
+    """
+    session = condor_db.session()
     rankings = [
         object_to_dict(matrix, sc.Ranking.properties.keys())
-        for matrix in RankingMatrix.list(db)
+        for matrix in RankingMatrix.list(session)
     ]
-    db.commit()
     return Response(rankings)
 
 
@@ -135,7 +139,10 @@ routes = [
     Route('/document/{eid}', 'GET', get_document),
 
     Route('/matrix', 'GET', get_all_matrices),
-    Route('/matrix/{eid}', 'GET', get_matrix)
+    Route('/matrix/{eid}', 'GET', get_matrix),
+
+    Include('/docs', docs_routes),
+    Include('/static', static_routes),
 ]
 
 app = App(routes=routes)
