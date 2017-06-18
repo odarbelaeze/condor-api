@@ -6,27 +6,10 @@ import pytest
 
 from condor.config import DEFAULT_DB_PATH
 from condor.models.base import DeclarativeBase
-from sanic.testing import SanicTestClient
+from apistar.test import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm.session import Session
 
-
-class DecoratedResponse(object):
-    """A response with a synchronous json method."""
-    def __init__(self, response):
-        self._response = response
-    def json(self):
-        """Sync implementation of the json method"""
-        return json.loads(self._response.body.decode('utf-8'))
-    def __getattr__(self, name):
-        return getattr(self._response, name)
-
-
-class WrappedSanicTestClient(SanicTestClient):
-    """A test client that uses a decorated response with sync json method"""
-    def _sanic_endpoint_test(self, *args, **kwargs):
-        req, res = super()._sanic_endpoint_test(*args, **kwargs)
-        return req, DecoratedResponse(res)
 
 
 @pytest.fixture(scope='session')
@@ -77,9 +60,8 @@ def fresh_database(session, monkeypatch):
 
 
 @pytest.fixture()
-def client(monkeypatch):
+def client():
     """
     A simple test client wrapper.
     """
-    import app
-    return WrappedSanicTestClient(app.app)
+    return TestClient()

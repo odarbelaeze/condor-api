@@ -22,7 +22,7 @@ before_script:
   - python -m nltk.downloader snowball_data stopwords
 
 script:
-  - coverage run --source=app -m pytest tests
+  - coverage run --source=app -m apistar test
 
 after_success:
   - coveralls

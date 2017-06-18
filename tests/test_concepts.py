@@ -15,6 +15,6 @@ def test_one_equals_two():
 
 
 def test_ping(client):
-    _, res = client.get('/ping')
+    res = client.get('/ping')
     assert res.status == 200
     assert res.body == b'pong'

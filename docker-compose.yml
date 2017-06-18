@@ -2,9 +2,9 @@ version: '2'
 services:
   backend:
     build: .
-    command: python app.py
+    command: apistar run --host 0.0.0.0
     volumes:
       - .:/app
       - ${HOME}/.condor:/root/.condor
     ports:
-      - "8000:8000"
+      - "8080:8080"
