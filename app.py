@@ -1,6 +1,7 @@
 import json
 
-from apistar import App, Route, Include, http, Response
+from apistar import App, Route, Include, Response
+from apistar.http import QueryParam as Param
 from apistar.docs import docs_routes
 from apistar.schema import List
 from apistar.statics import static_routes
@@ -42,17 +43,15 @@ def ping():
     return "pong"
 
 
-def get_all_rankings() -> List[sc.Ranking]:
+def get_all_rankings(session: CondorSession) -> List[sc.Ranking]:
     """
     List all ranking matrices from the database.
     """
-    session = condor_db.session()
     return [sc.Ranking(matrix) for matrix in RankingMatrix.list(session)]
 
 
-def get_ranking(eid) -> Response:
-    db = condor_db.session()
-    ranking = RankingMatrix.find_by_eid(db, eid)
+def get_ranking(eid, session: CondorSession) -> Response:
+    ranking = RankingMatrix.find_by_eid(session, eid)
     if not ranking:
         return Response(
             {'message': 'The especified eid is not found on database'},
@@ -68,9 +67,8 @@ def get_all_bibliographies(session: CondorSession) -> List[sc.Bibliography]:
     return [sc.Bibliography(bib) for bib in Bibliography.list(session)]
 
 
-def get_bibliography(eid) -> Response:
-    db = condor_db.session()
-    bibliography = Bibliography.find_by_eid(db, eid)
+def get_bibliography(eid, session: CondorSession) -> Response:
+    bibliography = Bibliography.find_by_eid(session, eid)
     if not bibliography:
         return Response(
             {'message': 'The especified eid is not found on database'},
@@ -79,8 +77,7 @@ def get_bibliography(eid) -> Response:
     return Response(sc.Bibliography(bibliography))
 
 
-def get_all_documents(bibliography: http.QueryParam) -> Response:
-    db = condor_db.session()
+def get_all_documents(bibliography: Param, session: CondorSession) -> Response:
     if not bibliography:
         return Response(
             {'message': 'The especified eid is not found on database'},
@@ -88,14 +85,13 @@ def get_all_documents(bibliography: http.QueryParam) -> Response:
         )
     documents = [
         object_to_dict(doc, sc.Document.properties.keys())
-        for doc in Document.list(db, bibliography)
+        for doc in Document.list(session, bibliography)
     ]
     return Response(documents)
 
 
-def get_document(eid) -> Response:
-    db = condor_db.session()
-    document = Document.find_by_eid(db, eid)
+def get_document(eid, session: CondorSession) -> Response:
+    document = Document.find_by_eid(session, eid)
     if not document:
         return Response(
             {'message': 'The especified eid is not found on database'},
@@ -104,18 +100,16 @@ def get_document(eid) -> Response:
     return Response(object_to_dict(document, sc.Document.properties.keys()))
 
 
-def get_all_matrices() -> List[sc.Matrix]:
-    db = condor_db.session()
+def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
     matrices = [
         object_to_dict(mat, sc.Matrix.properties.keys())
-        for mat in TermDocumentMatrix.list(db)
+        for mat in TermDocumentMatrix.list(session)
     ]
     return matrices
 
 
-def get_matrix(eid) -> Response:
-    db = condor_db.session()
-    matrix = TermDocumentMatrix.find_by_eid(db, eid)
+def get_matrix(eid, session: CondorSession) -> Response:
+    matrix = TermDocumentMatrix.find_by_eid(session, eid)
     if not matrix:
         return Response(
             {'message': 'The especified eid is not found on database'},
