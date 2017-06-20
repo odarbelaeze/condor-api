@@ -27,18 +27,6 @@ class CondorSession(object):
         return condor_db.session()
 
 
-def object_to_dict(obj, fields):
-    def to_serializable(value):
-        try:
-            json.dumps(value)
-            return value
-        except Exception:
-            return str(value)
-    return {
-        field: to_serializable(getattr(obj, field)) for field in fields
-    }
-
-
 def ping():
     return "pong"
 
@@ -84,8 +72,7 @@ def get_all_documents(bibliography: Param, session: CondorSession) -> Response:
             status=400,
         )
     documents = [
-        object_to_dict(doc, sc.Document.properties.keys())
-        for doc in Document.list(session, bibliography)
+        sc.Document(doc) for doc in Document.list(session, bibliography)
     ]
     return Response(documents)
 
@@ -97,15 +84,11 @@ def get_document(eid, session: CondorSession) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    return Response(object_to_dict(document, sc.Document.properties.keys()))
+    return Response(sc.Document(document))
 
 
 def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
-    matrices = [
-        object_to_dict(mat, sc.Matrix.properties.keys())
-        for mat in TermDocumentMatrix.list(session)
-    ]
-    return matrices
+    return [sc.Matrix(mat) for mat in TermDocumentMatrix.list(session)]
 
 
 def get_matrix(eid, session: CondorSession) -> Response:
@@ -115,7 +98,7 @@ def get_matrix(eid, session: CondorSession) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    return Response(object_to_dict(matrix, sc.Matrix.properties.keys()))
+    return Response(sc.Matrix(matrix))
 
 
 routes = [
