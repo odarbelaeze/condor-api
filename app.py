@@ -14,6 +14,18 @@ from condor.models import (
 )
 
 
+class CondorSession(object):
+    """
+    Injects a condor db session.
+    """
+    @classmethod
+    def build(cls):
+        """
+        Default db session from condor.
+        """
+        return condor_db.session()
+
+
 def object_to_dict(obj, fields):
     def to_serializable(value):
         try:
@@ -49,8 +61,10 @@ def get_ranking(eid) -> Response:
     return Response(sc.Ranking(ranking))
 
 
-def get_all_bibliographies() -> List[sc.Bibliography]:
-    session = condor_db.session()
+def get_all_bibliographies(session: CondorSession) -> List[sc.Bibliography]:
+    """
+    List all bibliographies in the database.
+    """
     return [sc.Bibliography(bib) for bib in Bibliography.list(session)]
 
 
