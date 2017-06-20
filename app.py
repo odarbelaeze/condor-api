@@ -39,6 +39,9 @@ def get_all_rankings(session: CondorSession) -> List[sc.Ranking]:
 
 
 def get_ranking(eid, session: CondorSession) -> Response:
+    """
+    List the ranking that has the specified eid from the database.
+    """
     ranking = RankingMatrix.find_by_eid(session, eid)
     if not ranking:
         return Response(
@@ -56,6 +59,9 @@ def get_all_bibliographies(session: CondorSession) -> List[sc.Bibliography]:
 
 
 def get_bibliography(eid, session: CondorSession) -> Response:
+    """
+    List the bibliography that has the specified eid from the database.
+    """
     bibliography = Bibliography.find_by_eid(session, eid)
     if not bibliography:
         return Response(
@@ -66,6 +72,10 @@ def get_bibliography(eid, session: CondorSession) -> Response:
 
 
 def get_all_documents(bibliography: Param, session: CondorSession) -> Response:
+    """
+    List all documents that are related to a specific bibliography
+    from the the database.
+    """
     if not bibliography:
         return Response(
             {'message': 'The especified eid is not found on database'},
@@ -78,6 +88,9 @@ def get_all_documents(bibliography: Param, session: CondorSession) -> Response:
 
 
 def get_document(eid, session: CondorSession) -> Response:
+    """
+    List the document that has the specified eid from the database.
+    """
     document = Document.find_by_eid(session, eid)
     if not document:
         return Response(
@@ -88,10 +101,16 @@ def get_document(eid, session: CondorSession) -> Response:
 
 
 def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
+    """
+    List all matrices in the database.
+    """
     return [sc.Matrix(mat) for mat in TermDocumentMatrix.list(session)]
 
 
 def get_matrix(eid, session: CondorSession) -> Response:
+    """
+    List the matrix that has the specified eid from the database.
+    """
     matrix = TermDocumentMatrix.find_by_eid(session, eid)
     if not matrix:
         return Response(
