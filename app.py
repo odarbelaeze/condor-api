@@ -35,11 +35,7 @@ def get_all_rankings() -> List[sc.Ranking]:
     List all ranking matrices from the database.
     """
     session = condor_db.session()
-    rankings = [
-        object_to_dict(matrix, sc.Ranking.properties.keys())
-        for matrix in RankingMatrix.list(session)
-    ]
-    return rankings
+    return [sc.Ranking(matrix) for matrix in RankingMatrix.list(session)]
 
 
 def get_ranking(eid) -> Response:
@@ -50,16 +46,12 @@ def get_ranking(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    return Response(object_to_dict(ranking, sc.Ranking.properties.keys()))
+    return Response(sc.Ranking(ranking))
 
 
 def get_all_bibliographies() -> List[sc.Bibliography]:
-    db = condor_db.session()
-    bibliographies = [
-        object_to_dict(bib, sc.Bibliography.properties.keys())
-        for bib in Bibliography.list(db)
-    ]
-    return bibliographies
+    session = condor_db.session()
+    return [sc.Bibliography(bib) for bib in Bibliography.list(session)]
 
 
 def get_bibliography(eid) -> Response:
@@ -70,9 +62,7 @@ def get_bibliography(eid) -> Response:
             {'message': 'The especified eid is not found on database'},
             status=404,
         )
-    return Response(
-        object_to_dict(bibliography, sc.Bibliography.properties.keys())
-    )
+    return Response(sc.Bibliography(bibliography))
 
 
 def get_all_documents(bibliography: http.QueryParam) -> Response:
