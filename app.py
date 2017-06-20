@@ -2,6 +2,7 @@ import json
 
 from apistar import App, Route, Include, http, Response
 from apistar.docs import docs_routes
+from apistar.schema import List
 from apistar.statics import static_routes
 import condor.dbutil as condor_db
 import schemas as sc
@@ -29,7 +30,7 @@ def ping():
     return "pong"
 
 
-def get_all_rankings() -> Response:
+def get_all_rankings() -> List[sc.Ranking]:
     """
     List all ranking matrices from the database.
     """
@@ -38,7 +39,7 @@ def get_all_rankings() -> Response:
         object_to_dict(matrix, sc.Ranking.properties.keys())
         for matrix in RankingMatrix.list(session)
     ]
-    return Response(rankings)
+    return rankings
 
 
 def get_ranking(eid) -> Response:
@@ -52,13 +53,13 @@ def get_ranking(eid) -> Response:
     return Response(object_to_dict(ranking, sc.Ranking.properties.keys()))
 
 
-def get_all_bibliographies() -> Response:
+def get_all_bibliographies() -> List[sc.Bibliography]:
     db = condor_db.session()
     bibliographies = [
         object_to_dict(bib, sc.Bibliography.properties.keys())
         for bib in Bibliography.list(db)
     ]
-    return Response(bibliographies)
+    return bibliographies
 
 
 def get_bibliography(eid) -> Response:
@@ -99,13 +100,13 @@ def get_document(eid) -> Response:
     return Response(object_to_dict(document, sc.Document.properties.keys()))
 
 
-def get_all_matrices() -> Response:
+def get_all_matrices() -> List[sc.Matrix]:
     db = condor_db.session()
     matrices = [
         object_to_dict(mat, sc.Matrix.properties.keys())
         for mat in TermDocumentMatrix.list(db)
     ]
-    return Response(matrices)
+    return matrices
 
 
 def get_matrix(eid) -> Response:
