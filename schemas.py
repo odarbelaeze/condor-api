@@ -47,3 +47,15 @@ class Matrix(schema.Object):
         "bibliography_options": schema.String(max_length=512),
         "processing_options": schema.String(max_length=512),
     }
+
+
+class MatrixDescriptor(schema.Object):
+    """
+    Describes the options to create a term document matrix.
+    """
+    properties = {
+        'bibliography': schema.String(max_length=40),
+        'regularise': schema.Boolean(default=True),
+        # TODO: schema.Array(of_enum), not available in 0.1.17
+        'fields': schema.String(max_length=100),
+    }
