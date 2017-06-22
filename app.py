@@ -110,12 +110,40 @@ def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
     return [sc.Matrix(mat) for mat in TermDocumentMatrix.list(session)]
 
 
-def create_matrix(descriptor: sc.MatrixDescriptor) -> Response:
+def create_matrix(
+        descriptor: sc.MatrixDescriptor, session: CondorSession) -> Response:
     """
     Create a term document matrix.
     """
-    print(descriptor)
-    return Response([])
+    try:
+        # The exception was used because 'one_or_latest' function fails if
+        # bibliography_eid is not in the database
+        bibliography_eid = descriptor.get("bibliography")[2:-2]
+        bibliography = condor_db.one_or_latest(
+            session,
+            Bibliography,
+            bibliography_eid
+        )
+    except Exception:
+        return Response(
+            {
+                'message':
+                'The especified bibliography eid is not found on database'
+            },
+            status=404,
+        )
+
+    matrix_fields = descriptor.get("fields")[2:-2].split(',')
+    td_matrix = TermDocumentMatrix.from_bibliography_set(
+        bibliography,
+        regularise=descriptor.get("regularise"),
+        fields=matrix_fields
+    )
+
+    session.add(td_matrix)
+    session.flush()
+
+    return Response(sc.Matrix(td_matrix))
 
 
 def get_matrix(eid, session: CondorSession) -> Response:
