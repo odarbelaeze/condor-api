@@ -38,6 +38,16 @@ class Ranking(schema.Object):
     }
 
 
+class RankingDescriptor(schema.Object):
+    """
+    Describes the options to create a term document matrix.
+    """
+    properties = {
+        'matrix': schema.String(max_length=40),
+        'covariance': schema.Number(minimun=0, maximum=1, default=0.8),
+    }
+
+
 class Matrix(schema.Object):
     properties = {
         "eid": schema.String(max_length=40),

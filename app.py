@@ -41,6 +41,29 @@ def get_all_rankings(session: CondorSession) -> List[sc.Ranking]:
     return [sc.Ranking(matrix) for matrix in RankingMatrix.list(session)]
 
 
+def create_ranking(
+        descriptor: sc.RankingDescriptor, session: CondorSession) -> Response:
+    """
+    Create a term document matrix.
+    """
+    print(descriptor.get('matrix'))
+    td_matrix = TermDocumentMatrix.find_by_eid(session, descriptor.get('matrix'))
+    if td_matrix is None:
+        return Response(
+            {
+                'message': 'The especified matirx eid is not found on database'
+            },
+            status=404,
+        )
+    ranking_matrix = RankingMatrix.lsa_from_term_document_matrix(
+        term_document_matrix = td_matrix,
+        covariance=descriptor.get('covariance'),
+    )
+    session.add(ranking_matrix)
+    session.commit()
+    return Response(sc.Matrix(ranking_matrix))
+
+
 def get_ranking(eid, session: CondorSession) -> Response:
     """
     List the ranking that has the specified eid from the database.
@@ -160,6 +183,7 @@ routes = [
     Route('/matrix/{eid}', 'GET', get_matrix),
 
     Route('/ranking', 'GET', get_all_rankings),
+    Route('/ranking', 'POST', create_ranking),
     Route('/ranking/{eid}', 'GET', get_ranking),
 
     Include('/docs', docs_routes),
