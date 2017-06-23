@@ -49,6 +49,14 @@ class Matrix(schema.Object):
     }
 
 
+class MatrixFields(schema.Array):
+    """
+    An array of valid fields to pass to the create matrix constructor.
+    """
+    items = schema.Enum(enum=['title', 'description', 'keywords'])
+    unique_items = True
+
+
 class MatrixDescriptor(schema.Object):
     """
     Describes the options to create a term document matrix.
@@ -56,6 +64,5 @@ class MatrixDescriptor(schema.Object):
     properties = {
         'bibliography': schema.String(max_length=40),
         'regularise': schema.Boolean(default=True),
-        # TODO: schema.Array(of_enum), not available in 0.1.17
-        'fields': schema.String(max_length=100),
+        'fields': MatrixFields
     }

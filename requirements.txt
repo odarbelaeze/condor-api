@@ -1,4 +1,4 @@
-apistar==0.1.17
+git+https://github.com/tomchristie/apistar.git
 bibtexparser==0.6.2
 certifi==2017.4.17
 chardet==3.0.4

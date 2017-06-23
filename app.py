@@ -115,34 +115,21 @@ def create_matrix(
     """
     Create a term document matrix.
     """
-    try:
-        # The exception was used because 'one_or_latest' function fails if
-        # bibliography_eid is not in the database
-        bibliography_eid = descriptor.get("bibliography")[2:-2]
-        bibliography = condor_db.one_or_latest(
-            session,
-            Bibliography,
-            bibliography_eid
-        )
-    except Exception:
+    bibliography = Bibliography.find_by_eid(session, descriptor.get('bibliography'))
+    if bibliography is None:
         return Response(
             {
-                'message':
-                'The especified bibliography eid is not found on database'
+                'message': 'The especified bibliography eid is not found on database'
             },
             status=404,
         )
-
-    matrix_fields = descriptor.get("fields")[2:-2].split(',')
     td_matrix = TermDocumentMatrix.from_bibliography_set(
         bibliography,
-        regularise=descriptor.get("regularise"),
-        fields=matrix_fields
+        regularise=descriptor.get('regularise'),
+        fields=descriptor.get('fields')
     )
-
     session.add(td_matrix)
-    session.flush()
-
+    session.commit()
     return Response(sc.Matrix(td_matrix))
 
 
