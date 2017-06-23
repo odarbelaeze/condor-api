@@ -66,3 +66,46 @@ class MatrixDescriptor(schema.Object):
         'regularise': schema.Boolean(default=True),
         'fields': MatrixFields
     }
+
+
+class BibliographyFiles(schema.Array):
+    """
+    An array of possibles languages
+    """
+    items = schema.Enum(
+        enum=[]
+    )
+    unique_items = True
+
+
+class BibliographyKind(schema.Array):
+    """
+    An array of possibles types of files
+    """
+    items = schema.Enum(
+        enum=['isi', 'bib', 'xml', 'froac']
+    )
+    unique_items = True
+
+
+
+class BibliographyLanguages(schema.Array):
+    """
+    An array of possibles languages
+    """
+    items = schema.Enum(
+        enum=['english', 'spanish', 'portuguese', 'french', 'italian', 'german']
+    )
+    unique_items = True
+
+
+class BibliographyDescriptor(schema.Object):
+    """
+    Describes the options to create a bibliography.
+    """
+    properties = {
+        'kind': BibliographyKind,
+        'files': schema.Array(items=schema.String(max_length=float('inf'))),
+        'description': schema.String(max_length=float('inf')),
+        'languages': BibliographyLanguages,
+    }

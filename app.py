@@ -110,6 +110,45 @@ def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
     return [sc.Matrix(mat) for mat in TermDocumentMatrix.list(session)]
 
 
+def create_bibliography(session: CondorSession, descriptor: sc.BibliographyDescriptor) -> Response:
+    """
+    reate a bibliography.
+    """
+    description = descriptor.get('description')
+        or 'Document set from {count} {kind} files.'.format(
+        count=len(descriptor.get('files')),
+        kind=descriptor.get('kind')
+    )
+    bib = Bibliography(description=description)
+    session.add(bib)
+    session.flush()
+
+    mappings = Document.mappings_from_files(
+        list([file.name for file in descriptor.get('files')]),
+        kind,
+        full_text_path=descriptor.get('fulltext'),
+        force=descriptor.get('no_cache'),
+        bibliography_eid=bib.eid
+    )
+
+    if descriptor.get('languages'):
+        bib.description += ' Filtered to {}.'.format(
+            ', '.join(descriptor.get('languages'))
+        )
+        mappings = [
+            m
+            for m in mappings
+            if m.get('language', 'english').lower() in descriptor.get('languages')
+        ]
+
+    session.bulk_insert_mappings(
+        Document,
+        mappings
+    )
+
+    session.commit()
+
+
 def create_matrix(
         descriptor: sc.MatrixDescriptor, session: CondorSession) -> Response:
     """
