@@ -28,6 +28,9 @@ class CondorSession(object):
 
 
 def ping():
+    """
+    Simple healthcheck endpoint.
+    """
     return "pong"
 
 
@@ -107,6 +110,29 @@ def get_all_matrices(session: CondorSession) -> List[sc.Matrix]:
     return [sc.Matrix(mat) for mat in TermDocumentMatrix.list(session)]
 
 
+def create_matrix(
+        descriptor: sc.MatrixDescriptor, session: CondorSession) -> Response:
+    """
+    Create a term document matrix.
+    """
+    bibliography = Bibliography.find_by_eid(session, descriptor.get('bibliography'))
+    if bibliography is None:
+        return Response(
+            {
+                'message': 'The especified bibliography eid is not found on database'
+            },
+            status=404,
+        )
+    td_matrix = TermDocumentMatrix.from_bibliography_set(
+        bibliography,
+        regularise=descriptor.get('regularise'),
+        fields=descriptor.get('fields')
+    )
+    session.add(td_matrix)
+    session.commit()
+    return Response(sc.Matrix(td_matrix))
+
+
 def get_matrix(eid, session: CondorSession) -> Response:
     """
     List the matrix that has the specified eid from the database.
@@ -123,17 +149,18 @@ def get_matrix(eid, session: CondorSession) -> Response:
 routes = [
     Route('/ping', 'GET', ping),
 
-    Route('/ranking', 'GET', get_all_rankings),
-    Route('/ranking/{eid}', 'GET', get_ranking),
+    Route('/document', 'GET', get_all_documents),
+    Route('/document/{eid}', 'GET', get_document),
 
     Route('/bibliography', 'GET', get_all_bibliographies),
     Route('/bibliography/{eid}', 'GET', get_bibliography),
 
-    Route('/document', 'GET', get_all_documents),
-    Route('/document/{eid}', 'GET', get_document),
-
     Route('/matrix', 'GET', get_all_matrices),
+    Route('/matrix', 'POST', create_matrix),
     Route('/matrix/{eid}', 'GET', get_matrix),
+
+    Route('/ranking', 'GET', get_all_rankings),
+    Route('/ranking/{eid}', 'GET', get_ranking),
 
     Include('/docs', docs_routes),
     Include('/static', static_routes),

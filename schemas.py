@@ -10,7 +10,7 @@ class Bibliography(schema.Object):
         "eid": schema.String(max_length=40),
         "created": schema.String(max_length=50),
         "modified": schema.String(max_length=50),
-        "description": schema.String(max_length=100),
+        "description": schema.String(max_length=float('inf')),
     }
 
 
@@ -20,8 +20,8 @@ class Document(schema.Object):
         'created': schema.String(max_length=50),
         'modified': schema.String(max_length=50),
         'bibliography_eid': schema.String(max_length=40),
-        'title': schema.String(max_length=40),
-        'description': schema.String(max_length=512),
+        'title': schema.String(max_length=512),
+        'description': schema.String(max_length=float('inf')),
         'keywords': schema.String(max_length=512),
         'language': schema.String(max_length=16)
     }
@@ -46,4 +46,23 @@ class Matrix(schema.Object):
         "bibliography_eid": schema.String(max_length=40),
         "bibliography_options": schema.String(max_length=512),
         "processing_options": schema.String(max_length=512),
+    }
+
+
+class MatrixFields(schema.Array):
+    """
+    An array of valid fields to pass to the create matrix constructor.
+    """
+    items = schema.Enum(enum=['title', 'description', 'keywords'])
+    unique_items = True
+
+
+class MatrixDescriptor(schema.Object):
+    """
+    Describes the options to create a term document matrix.
+    """
+    properties = {
+        'bibliography': schema.String(max_length=40),
+        'regularise': schema.Boolean(default=True),
+        'fields': MatrixFields
     }
